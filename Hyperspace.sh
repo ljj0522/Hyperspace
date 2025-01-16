@@ -90,6 +90,9 @@ function deploy_hyperspace_node() {
 
     # 使用 my.pem 文件运行 import-keys 命令
     echo "正在使用 my.pem 文件运行 import-keys 命令..."
+
+    source /root/.bashrc
+    sleep 5
     
     # 运行 import-keys 命令
     aios-cli hive import-keys ./my.pem
@@ -115,21 +118,25 @@ function deploy_hyperspace_node() {
 
     # 登录到 Hive
     aios-cli hive login
+    sleep 5
 
+    aios-cli hive select-tier 
+    sleep 5
+    
     # 提示用户选择等级
-    echo "请选择等级（1-5）："
-    select tier in 1 2 3 4 5; do
-        case $tier in
-            1|2|3|4|5)
-                echo "你选择了等级 $tier"
-                aios-cli hive select-tier $tier
-                break
-                ;;
-            *)
-                echo "无效的选择，请输入 1 到 5 之间的数字。"
-                ;;
-        esac
-    done
+    # echo "请选择等级（1-5）："
+    # select tier in 1 2 3 4 5; do
+    #     case $tier in
+    #         1|2|3|4|5)
+    #             echo "你选择了等级 $tier"
+    #             aios-cli hive select-tier $tier
+    #             break
+    #             ;;
+    #         *)
+    #             echo "无效的选择，请输入 1 到 5 之间的数字。"
+    #             ;;
+    #     esac
+    # done
 
     # 连接到 Hive
     aios-cli hive connect

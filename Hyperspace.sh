@@ -120,7 +120,7 @@ function deploy_hyperspace_node() {
     aios-cli hive login
     sleep 5
 
-    aios-cli hive select-tier 
+    aios-cli hive select-tier 3
     sleep 5
     
     # 提示用户选择等级

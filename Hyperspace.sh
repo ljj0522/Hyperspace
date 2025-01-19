@@ -188,6 +188,10 @@ function delete_node() {
     
     echo "'aios-cli kill' 执行完成，节点已停止。"
 
+    start_log_monitor
+
+    sleep 5
+
     # 提示用户按任意键返回主菜单
     read -n 1 -s -r -p "按任意键返回主菜单..."
     main_menu

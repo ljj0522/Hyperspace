@@ -130,6 +130,8 @@ function deploy_hyperspace_node() {
     # 登录到 Hive
     aios-cli hive login
 
+    sleep 5
+
     # # 提示用户选择等级
     # echo "请选择等级（1-5）："
     # select tier in 1 2 3 4 5; do
@@ -147,6 +149,8 @@ function deploy_hyperspace_node() {
 
     aios-cli hive select-tier 3
 
+    sleep 5
+    
     # 连接到 Hive
     aios-cli hive connect
     sleep 5

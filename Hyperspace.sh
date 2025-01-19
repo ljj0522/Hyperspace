@@ -165,6 +165,10 @@ function deploy_hyperspace_node() {
 
     echo "部署hyperspace节点完成，'aios-cli start --connect' 已在屏幕内运行，系统已恢复到后台。"
 
+    start_log_monitor
+
+    sleep 5
+
     # 提示用户按任意键返回主菜单
     read -n 1 -s -r -p "按任意键返回主菜单..."
     main_menu
@@ -187,10 +191,6 @@ function delete_node() {
     sleep 2
     
     echo "'aios-cli kill' 执行完成，节点已停止。"
-
-    start_log_monitor
-
-    sleep 5
 
     # 提示用户按任意键返回主菜单
     read -n 1 -s -r -p "按任意键返回主菜单..."

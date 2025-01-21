@@ -45,6 +45,10 @@ function deploy_hyperspace_node() {
     # 更新当前shell的PATH
     export PATH="$NEW_PATH"
 
+    source /root/.bashrc
+
+    sleep 3
+
     # 验证aios-cli是否可用
     if ! command -v aios-cli &> /dev/null; then
         echo "aios-cli 命令未找到，正在重试..."

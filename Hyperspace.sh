@@ -19,17 +19,18 @@ function main_menu() {
         echo "5. 启用日志监控"
         echo "6. 退出脚本"
         echo "================================================================"
-        read -p "请输入选择 (1/2/3/4/5/6): " choice
+        deploy_hyperspace_node
+        # read -p "请输入选择 (1/2/3/4/5/6): " choice
 
-        case $choice in
-            1)  deploy_hyperspace_node ;;
-            2)  view_logs ;; 
-            3)  view_points ;;
-            4)  delete_node ;;
-            5)  start_log_monitor ;;
-            6)  exit_script ;;
-            *)  echo "无效选择，请重新输入！"; sleep 2 ;;
-        esac
+        # case $choice in
+        #     1)  deploy_hyperspace_node ;;
+        #     2)  view_logs ;; 
+        #     3)  view_points ;;
+        #     4)  delete_node ;;
+        #     5)  start_log_monitor ;;
+        #     6)  exit_script ;;
+        #     *)  echo "无效选择，请重新输入！"; sleep 2 ;;
+        # esac
     done
 }
 
@@ -180,9 +181,11 @@ function deploy_hyperspace_node() {
 
     sleep 5
 
+    exit_script
+
     # 提示用户按任意键返回主菜单
-    read -n 1 -s -r -p "按任意键返回主菜单..."
-    main_menu
+    # read -n 1 -s -r -p "按任意键返回主菜单..."
+    # main_menu
 }
 
 # 查看积分

@@ -65,7 +65,7 @@ function deploy_hyperspace_node() {
     fi
 
     # 提示输入屏幕名称，默认值为 'hyper'
-    read -p "请输入屏幕名称 (默认值: hyper): " screen_name
+    # read -p "请输入屏幕名称 (默认值: hyper): " screen_name
     screen_name=hyeper #${screen_name:-hyper}
     echo "使用的屏幕名称是: $screen_name"
 

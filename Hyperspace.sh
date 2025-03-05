@@ -35,6 +35,7 @@ function main_menu() {
 
 # 部署hyperspace节点
 function deploy_hyperspace_node() {
+    apt install screen -y
     # 执行安装命令
     echo "正在执行安装命令：curl https://download.hyper.space/api/install | bash"
     curl https://download.hyper.space/api/install | bash

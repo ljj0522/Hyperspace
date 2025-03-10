@@ -9,7 +9,7 @@ echo -e "net.ipv6.conf.all.disable_ipv6 = 0\nnet.ipv6.conf.default.disable_ipv6 
 
 sudo sysctl -p
 
-wget -O Hyperspace.sh https://github.com/ljj0522/Hyperspace/raw/refs/heads/main/Hyperspace.sh && sed -i 's/\r$//' Hyperspace.sh && chmod +x Hyperspace.sh && ./Hyperspace.sh
+wget -O Hyperspace.sh https://raw.githubusercontent.com/ljj0522/Hyperspace/refs/heads/main/Hyperspace.sh && sed -i 's/\r$//' Hyperspace.sh && chmod +x Hyperspace.sh && ./Hyperspace.sh
 
 source /root/.bashrc && bash Hyperspace.sh
 

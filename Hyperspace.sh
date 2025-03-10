@@ -264,9 +264,10 @@ EOL
     echo "可以通过查看 /root/monitor.log 来检查监控状态"
     sleep 2
 
+    start_points_monitor
     # 提示用户按任意键返回主菜单
-    read -n 1 -s -r -p "按任意键返回主菜单..."
-    main_menu
+    # read -n 1 -s -r -p "按任意键返回主菜单..."
+    # main_menu
 }
 
 # 启用积分监控

@@ -3,6 +3,17 @@
 # 脚本保存路径
 SCRIPT_PATH="$HOME/Hyperspace.sh"
 
+# 检查并安装 screen
+function check_and_install_screen() {
+    if ! command -v screen &> /dev/null; then
+        echo "screen 未安装，正在安装..."
+        # 直接运行安装命令，无需 sudo
+        apt update && apt install -y screen
+    else
+        echo "screen 已安装。"
+    fi
+}
+
 # 主菜单函数
 function main_menu() {
     while true; do
@@ -17,10 +28,14 @@ function main_menu() {
         echo "3. 查看积分"
         echo "4. 删除节点（停止节点）"
         echo "5. 启用日志监控"
-        echo "6. 退出脚本"
+        echo "6. 查看使用的私钥"
+        echo "7. 查看aios daemon状态"
+        echo "8. 启用积分监控"
+        echo "9. 退出脚本"
         echo "================================================================"
+
         deploy_hyperspace_node
-        # read -p "请输入选择 (1/2/3/4/5/6): " choice
+        # read -p "请输入选择 (1/2/3/4/5/6/7/8/9): " choice
 
         # case $choice in
         #     1)  deploy_hyperspace_node ;;
@@ -28,7 +43,10 @@ function main_menu() {
         #     3)  view_points ;;
         #     4)  delete_node ;;
         #     5)  start_log_monitor ;;
-        #     6)  exit_script ;;
+        #     6)  view_private_key ;;
+        #     7)  view_status ;;
+        #     8)  start_points_monitor ;;
+        #     9)  exit_script ;;
         #     *)  echo "无效选择，请重新输入！"; sleep 2 ;;
         # esac
     done
@@ -36,7 +54,6 @@ function main_menu() {
 
 # 部署hyperspace节点
 function deploy_hyperspace_node() {
-    apt install screen -y
     # 执行安装命令
     echo "正在执行安装命令：curl https://download.hyper.space/api/install | bash"
     curl https://download.hyper.space/api/install | bash
@@ -46,10 +63,6 @@ function deploy_hyperspace_node() {
     
     # 更新当前shell的PATH
     export PATH="$NEW_PATH"
-
-    source /root/.bashrc
-
-    sleep 3
 
     # 验证aios-cli是否可用
     if ! command -v aios-cli &> /dev/null; then
@@ -65,8 +78,8 @@ function deploy_hyperspace_node() {
     fi
 
     # 提示输入屏幕名称，默认值为 'hyper'
-    # read -p "请输入屏幕名称 (默认值: hyper): " screen_name
-    screen_name=hyper #${screen_name:-hyper}
+    read -p "请输入屏幕名称 (默认值: hyper): " screen_name
+    screen_name=${screen_name:-hyper}
     echo "使用的屏幕名称是: $screen_name"
 
     # 清理已存在的 'hyper' 屏幕会话
@@ -104,16 +117,10 @@ function deploy_hyperspace_node() {
     # 打印当前 PATH，确保 aios-cli 在其中
     echo "当前 PATH: $PATH"
 
-    # 检查文件是否存在
-    if [ -f "my.pem" ]; then
-        echo "文件 my.pem 已存在。"
-    else
-         # 提示用户输入私钥并保存为 my.pem 文件
-        echo "请输入你的私钥（按 CTRL+D 结束）："
-        cat > my.pem
-    
-    fi
-        
+    # 提示用户输入私钥并保存为 my.pem 文件
+    echo "请输入你的私钥（按 CTRL+D 结束）："
+    cat > my.pem
+
     # 使用 my.pem 文件运行 import-keys 命令
     echo "正在使用 my.pem 文件运行 import-keys 命令..."
     
@@ -140,11 +147,10 @@ function deploy_hyperspace_node() {
     echo "正在登录并选择等级..."
 
     # 登录到 Hive
-    aios-cli hive login
+    aios-cli hive login  && aios-cli hive select-tier 3
 
-    sleep 5
-
-    # # 提示用户选择等级
+    
+    # 提示用户选择等级
     # echo "请选择等级（1-5）："
     # select tier in 1 2 3 4 5; do
     #     case $tier in
@@ -159,10 +165,6 @@ function deploy_hyperspace_node() {
     #     esac
     # done
 
-    aios-cli hive select-tier 3
-
-    sleep 5
-    
     # 连接到 Hive
     aios-cli hive connect
     sleep 5
@@ -179,10 +181,6 @@ function deploy_hyperspace_node() {
 
     start_log_monitor
 
-    sleep 5
-
-    exit_script
-
     # 提示用户按任意键返回主菜单
     # read -n 1 -s -r -p "按任意键返回主菜单..."
     # main_menu
@@ -193,7 +191,7 @@ function view_points() {
     echo "正在查看积分..."
     source /root/.bashrc
     aios-cli hive points
-    sleep 2
+    sleep 5
 }
 
 # 删除节点（停止节点）
@@ -231,9 +229,10 @@ while true; do
         tail -n 4 "$LOG_FILE" | grep -q "Failed to authenticate" || \
         tail -n 4 "$LOG_FILE" | grep -q "Failed to connect to Hive" || \
         tail -n 4 "$LOG_FILE" | grep -q "Another instance is already running" || \
-        tail -n 4 "$LOG_FILE" | grep -q "\"message\": \"Internal server error\"") && \
+        tail -n 4 "$LOG_FILE" | grep -q "\"message\": \"Internal server error\"" || \
+        tail -n 4 "$LOG_FILE" | grep -q "thread 'main' panicked at aios-cli/src/main.rs:181:39: called \`Option::unwrap()\` on a \`None\` value") && \
        [ $((current_time - LAST_RESTART)) -gt $MIN_RESTART_INTERVAL ]; then
-        echo "$(date): 检测到连接问题、认证失败、连接到 Hive 失败、实例已在运行或内部服务器错误，正在重启服务..." >> /root/monitor.log
+        echo "$(date): 检测到连接问题、认证失败、连接到 Hive 失败、实例已在运行、内部服务器错误或 'Option::unwrap()' 错误，正在重启服务..." >> /root/monitor.log
         
         # 先发送 Ctrl+C
         screen -S "$SCREEN_NAME" -X stuff $'\003'
@@ -270,6 +269,59 @@ EOL
     main_menu
 }
 
+# 启用积分监控
+function start_points_monitor() {
+    echo "启动积分监控..."
+
+    # 创建积分监控脚本文件
+    cat > /root/points_monitor.sh << 'EOL'
+#!/bin/bash
+LOG_FILE="/root/aios-cli.log"
+SCREEN_NAME="hyper"
+LAST_POINTS=0
+MIN_RESTART_INTERVAL=300
+
+while true; do
+    CURRENT_POINTS=$(aios-cli hive points)
+    
+    if [ "$CURRENT_POINTS" -eq "$LAST_POINTS" ]; then
+        echo "$(date): 积分没有增加，正在重启服务..." >> /root/points_monitor.log
+        
+        # 重启服务
+        screen -S "$SCREEN_NAME" -X stuff $'\003'
+        sleep 5
+        screen -S "$SCREEN_NAME" -X stuff "aios-cli kill\n"
+        sleep 5
+        
+        echo "$(date): 清理旧日志..." > "$LOG_FILE"
+        screen -S "$SCREEN_NAME" -X stuff "aios-cli start --connect >> /root/aios-cli.log 2>&1\n"
+        
+        LAST_POINTS=$CURRENT_POINTS
+    else
+        LAST_POINTS=$CURRENT_POINTS
+    fi
+
+    sleep 7200  # 每2小时检查一次积分变化
+done
+EOL
+
+    # 添加执行权限
+    chmod +x /root/points_monitor.sh
+
+    # 在后台启动积分监控脚本
+    nohup /root/points_monitor.sh > /root/points_monitor.log 2>&1 &
+
+    echo "积分监控已启动，后台运行中。"
+    echo "可以通过查看 /root/points_monitor.log 来检查监控状态"
+    sleep 2
+
+    exit_script
+
+    # 提示用户按任意键返回主菜单
+    # read -n 1 -s -r -p "按任意键返回主菜单..."
+    # main_menu
+}
+
 # 查看日志
 function view_logs() {
     echo "正在查看日志..."
@@ -281,6 +333,28 @@ function view_logs() {
     else
         echo "日志文件不存在: $LOG_FILE"
     fi
+
+    # 提示用户按任意键返回主菜单
+    read -n 1 -s -r -p "按任意键返回主菜单..."
+    main_menu
+}
+
+# 查看使用的私钥
+function view_private_key() {
+    echo "正在查看使用的私钥..."
+    aios-cli hive whoami
+    sleep 2
+
+    # 提示用户按任意键返回主菜单
+    read -n 1 -s -r -p "按任意键返回主菜单..."
+    main_menu
+}
+
+# 查看aios daemon状态
+function view_status() {
+    echo "正在查看aios状态..."
+    aios-cli status
+    sleep 2
 
     # 提示用户按任意键返回主菜单
     read -n 1 -s -r -p "按任意键返回主菜单..."
